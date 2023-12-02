@@ -22,6 +22,10 @@ struct grab{
 struct game{
     std::string raw;
     std::vector<grab> grabs;
+    int min_red;
+    int min_green;
+    int min_blue;
+    int power;
     int id;
 };
 
@@ -134,6 +138,38 @@ size_t add_ids(std::vector<game> games)
     return count;
 }
 
+
+
+
+
+void findPower(game& game)
+{
+    game.min_red = 0;
+    game.min_blue = 0;
+    game.min_green = 0;
+
+    for (auto grab : game.grabs)
+    {
+        if (game.min_red < grab.cubes["red"])
+            game.min_red = grab.cubes["red"];
+        if (game.min_green < grab.cubes["green"])
+            game.min_green = grab.cubes["green"];
+        if (game.min_blue < grab.cubes["blue"])
+            game.min_blue = grab.cubes["blue"];
+    }
+    game.power = game.min_red * game.min_green * game.min_blue;
+}
+
+size_t add_power(std::vector<game> games)
+{
+    size_t count = 0;
+    for (auto game : games)
+    {
+        count += game.power;
+    }
+    return count;
+}
+
 int main(int argc, char **argv)
 {
 
@@ -158,8 +194,10 @@ int main(int argc, char **argv)
 
         seperateGrabs(act_game);
         assignGrabs(act_game);
-        if (checkGame(act_game))
+        if (1){
+            findPower(act_game);
             games.push_back(act_game);
+        }
         continue;
 
     
@@ -170,7 +208,7 @@ int main(int argc, char **argv)
 
     }
     // count = countGrabs(games);
-    count = add_ids(games);
+    count = add_power(games);
     std::cout << count << std::endl;
 
 
