@@ -79,15 +79,28 @@ int getNumber(std::vector<char>& grid,  std::pair<std::pair<int, int>, std::pair
 
 bool searchForGear(std::vector<gear> &gears, gear& newGear)
 {
-    for (auto gear : gears)
+    for (auto &gear : gears)
     {
-        if (gear.pos == newGear.pos)
-            gear.nums.push_back(newGear)
+        if (gear.pos == newGear.pos){
+            gear.nums.push_back(newGear.nums.front());
+            return(1);
         }
     }
+    return (0);
 }
 
-// int checkGears(std::vector<gear> gears)
+int checkGears(std::vector<gear> gears)
+{
+    int count = 0;
+    for (auto gear : gears)
+    {
+        if (gear.nums.size() > 1)
+        {
+            count += gear.nums[0] * gear.nums[1];
+        }
+    }
+    return count;
+}
 
 int main(int argc, char **argv)
 {
@@ -121,7 +134,11 @@ int main(int argc, char **argv)
 
         newGear.pos = check_neighbours(grid, pos, grid_x, grid_y);
         if (newGear.pos.first != -1)
-            gear.nums.push_back(getNumber(grid, pos, grid_x));
+            {
+                newGear.nums.push_back(getNumber(grid, pos, grid_x));
+                if (!searchForGear(gears, newGear))
+                    gears.push_back(newGear);
+            }
 
         if (pos.second.first == grid_x)
             start = {0, pos.second.second +1};
@@ -130,6 +147,7 @@ int main(int argc, char **argv)
 
     }
 
+    count = checkGears(gears);
 
 
     std::cout << count << std::endl;
