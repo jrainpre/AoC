@@ -10,8 +10,7 @@
 class Card{
     public:
         int id;
-        bool executed = 0;
-        int freq;
+        int to_execute = 0;
         int score;
         std::vector<int> win;
         std::vector<int> play;
@@ -20,39 +19,33 @@ class Card{
         
 };
 
-std::vector<Card> unfoldCards(std::vector<Card>& allCards)
+void unfoldCards(std::map<int, Card>& allCards, int& count, int max)
 {
-    std::vector<Card> addCards;
     for (auto& card : allCards)
     {
-        if (card.score > 0 && !card.executed)
+        if (card.second.score > 0 && card.second.to_execute > 0)
         {
-            int i = card.id + 1;
-            while(i <= card.id + card.score)
+            int i = card.second.id + 1;
+            while(i <= card.second.id + card.second.score)
             {
-                for (auto& check_card : allCards)
+                if (i <= max)
                 {
-                    if (check_card.id == i)
-                    {
-                        Card newCard = check_card;
-                        newCard.executed = false;
-                        addCards.push_back(newCard);
-                        break;
-                    }
+                    if (allCards[i].score > 0)
+                        allCards[i].to_execute++;
+                    count++;
                 }
                 i++;
             }
+            card.second.to_execute--;
         }
-        card.executed = true;
     }
-    return addCards;
 }
 
-bool checkCardsUnfolded(std::vector<Card>& allCard)
+bool checkCardsUnfolded(std::map<int, Card>& allCard)
 {
     for (auto& card : allCard)
     {
-        if (!card.executed)
+        if (card.second.to_execute > 0)
             return false;
     }
     return true;
@@ -89,7 +82,7 @@ std::vector<int> Card::parseNums(std::string &input, char start, char end)
 
 int main(int argc, char **argv)
 {
-   std::vector<Card> cards;
+   std::map<int, Card> cards;
 
     std::ifstream file("input.txt");
     if (!file.is_open())
@@ -107,16 +100,17 @@ int main(int argc, char **argv)
         card.play = card.parseNums(line, '|', '\n');
         card.getCardScore();
         card.id = id++;
-        cards.push_back(card);
+        if (card.score > 0)
+            card.to_execute = 1;
+        cards[card.id] = card;
+        count++;
     }
+    int maxCards = count;
 
     while(!checkCardsUnfolded(cards))
     {
-        std::vector<Card> newCards = unfoldCards(cards);
-        for (auto card: newCards)
-            cards.push_back(card);
+        unfoldCards(cards, count, maxCards);
     }
-    count = cards.size();
 
     
 
